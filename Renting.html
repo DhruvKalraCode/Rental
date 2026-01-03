@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlMidad Rental Costing - Equipment Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1e1e1e;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .controls-section {
+      padding: 30px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .control-group label {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .control-group input[type='number'],
+    .control-group select {
+      padding: 10px 15px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .discount-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px;
+      background: #e8f5e9;
+      border-radius: 4px;
+      border: 2px solid #4caf50;
+    }
+
+    .discount-section input[type='checkbox'] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .discount-section label {
+      cursor: pointer;
+      font-weight: 600;
+      color: #2e7d32;
+      margin: 0;
+    }
+
+    .discount-badge {
+      background: #4caf50;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 30px;
+      padding: 30px;
+      align-items: start;
+    }
+
+    .equipment-list {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 800px;
+      overflow-y: auto;
+    }
+
+    .equipment-list h3 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+      font-size: 1.2rem;
+    }
+
+    .equipment-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .equipment-item:hover {
+      background: #f0f0f0;
+      border-color: #2c3e50;
+    }
+
+    .equipment-item input[type='checkbox'] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .equipment-item-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .equipment-item-info {
+      flex: 1;
+    }
+
+    .equipment-item-name {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .equipment-item-price {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    thead {
+      background: #2c3e50;
+      color: white;
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      border: 1px solid #dee2e6;
+    }
+
+    td {
+      padding: 12px 15px;
+      border: 1px solid #dee2e6;
+    }
+
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .item-name {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .price-cell {
+      text-align: right;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .quantity-select {
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .quantity-select:focus {
+      outline: none;
+      border-color: #2c3e50;
+      box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+    }
+
+    .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .remove-btn:hover {
+      background: #c82333;
+    }
+
+    .link-cell {
+      color: #0066cc;
+      text-decoration: none;
+      word-break: break-all;
+      font-size: 0.9rem;
+    }
+
+    .link-cell:hover {
+      text-decoration: underline;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .empty-state-text {
+      font-size: 1.2rem;
+    }
+
+    .summary-section {
+      padding: 30px;
+      background: #fff3cd;
+      border-top: 2px solid #ffc107;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .summary-row.total {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2c3e50;
+      border-top: 2px solid #ffc107;
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+
+    .summary-label {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    .summary-value {
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .discount-row {
+      color: #d9534f;
+    }
+
+    .discount-row .summary-value {
+      color: #d9534f;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .add-btn {
+      background: #2c3e50;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .add-btn:hover {
+      background: #1a252f;
+      transform: translateY(-2px);
+    }
+
+    .add-btn.secondary {
+      background: #6c757d;
+    }
+
+    .add-btn.secondary:hover {
+      background: #5a6268;
+    }
+
+    @media (max-width: 1024px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+
+      .equipment-list {
+        max-height: 400px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .controls-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .control-group {
+        width: 100%;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        margin-left: 0;
+      }
+
+      .add-btn {
+        width: 100%;
+      }
+
+      .table-wrapper {
+        padding: 15px;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        padding: 8px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>AlMidad Rental Costing</h1>
+      <p>Equipment Rental Calculator - Bahraini Dinar (BHD)</p>
+    </div>
+
+    <div class="controls-section">
+      <div class="control-group">
+        <label for="rentalDays">Rental Duration (Days):</label>
+        <input type="number" id="rentalDays" value="3" min="1" max="30" />
+      </div>
+
+      <div class="discount-section">
+        <input type="checkbox" id="studentDiscount" />
+        <label for="studentDiscount">Apply 15% Student Discount</label>
+        <span class="discount-badge" id="discountBadge" style="display: none;">-15% OFF</span>
+      </div>
+
+      <div class="action-buttons">
+        <button class="add-btn secondary" onclick="resetCalculator()">Reset All</button>
+        <button class="add-btn" onclick="exportData()">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="equipment-list">
+        <h3>📦 Select Equipment</h3>
+        <div id="equipmentCheckboxes"></div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="equipmentTable">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th style="text-align: right;">Per-day (BHD)</th>
+              <th style="text-align: right;">3-day unit cost (BHD)</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Total 1-day (BHD)</th>
+              <th style="text-align: right;">Total (BHD)</th>
+              <th>Source URL</th>
+              <th style="text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="empty-state">
+              <td colspan="8">
+                <div class="empty-state-icon">📦</div>
+                <div class="empty-state-text">
+                  No equipment selected. Check items on the left to get started!
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-row">
+        <span class="summary-label">Total 1-day (BHD):</span>
+        <span class="summary-value" id="summaryDaily">0.000</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Total (BHD) for selected days:</span>
+        <span class="summary-value" id="summaryTotal">0.000</span>
+      </div>
+      <div class="summary-row discount-row" id="discountRow" style="display: none;">
+        <span class="summary-label">Student Discount (15%):</span>
+        <span class="summary-value" id="discountAmount">-0.000</span>
+      </div>
+      <div class="summary-row total">
+        <span class="summary-label">GRAND TOTAL:</span>
+        <span class="summary-value" id="grandTotal">0.000</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Equipment data with true AlMidad day-based pricing (1–7 days)
+    const equipmentData = [
+      {
+        id: 1,
+        name: 'Lilliput A11 10.1 4k',
+        dailyPrice: 8.0,
+        url: 'https://almidad.bh/product/lilliput-a11-10-1-4k/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2022/08/1569341198_1507741.jpeg?fit=500%2C500&ssl=1',
+        dayRates: { 1: 8.0, 2: 16.0, 3: 22.0, 4: 29.0, 5: 36.0, 6: 43.0, 7: 50.0 }
+      },
+      {
+        id: 2,
+        name: 'Small HD FOCUS 5″ Monitor',
+        dailyPrice: 7.0,
+        url: 'https://almidad.bh/product/small-hd-focus-5/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/02/small.png?fit=510%2C510&ssl=1',
+        dayRates: { 1: 7.0, 2: 14.0, 3: 17.0, 4: 21.0, 5: 25.0, 6: 28.0, 7: 32.0 }
+      },
+      {
+        id: 3,
+        name: 'DJI SDR Transmission Combo (SDI/HDMI)',
+        dailyPrice: 15.0,
+        url: 'https://almidad.bh/product/dji-sdr-transmission-combo-sdi-hdmi/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2024/08/1721309435_IMG_2291462.jpg?fit=500%2C500&ssl=1',
+        dayRates: { 1: 15.0, 2: 30.0, 3: 41.0, 4: 54.0, 5: 68.0, 6: 81.0, 7: 95.0 }
+      },
+      {
+        id: 4,
+        name: 'Godox FL-150R Flexible LED Light',
+        dailyPrice: 13.0,
+        url: 'https://almidad.bh/product/godox-fl-150r-flexible-led-light/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2022/08/51V18PxxmmL._SL1200_.jpg?fit=510%2C510&ssl=1',
+        dayRates: { 1: 13.0, 2: 26.0, 3: 35.0, 4: 47.0, 5: 59.0, 6: 70.0, 7: 82.0 }
+      },
+      {
+        id: 5,
+        name: 'Aputure C120D II Light Storm LED Light',
+        dailyPrice: 13.0,
+        url: 'https://almidad.bh/product/aputure-c120d-ii-light-storm-led-light/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/03/120.png?fit=510%2C510&ssl=1',
+        dayRates: { 1: 13.0, 2: 26.0, 3: 35.0, 4: 47.0, 5: 59.0, 6: 70.0, 7: 82.0 }
+      },
+      {
+        id: 6,
+        name: 'Sandbag with 6kg weight',
+        dailyPrice: 1.0,
+        url: 'https://almidad.bh/product/sandbag-with-6kg-weight/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/03/1597664713_335806.jpg?fit=500%2C500&ssl=1',
+        // 1–7 days: 1 BHD per day
+        dayRates: { 1: 1.0, 2: 2.0, 3: 3.0, 4: 4.0, 5: 5.0, 6: 6.0, 7: 7.0 }
+      },
+      {
+        id: 7,
+        name: 'Umbrella strip softbox 30x150cm',
+        dailyPrice: 2.0,
+        url: 'https://almidad.bh/product/umbrella-strip-softbox-30x150cm/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/05/nicefoto-strip-softbox-30x150cm-with-fabric-grid-for-broncolor.jpg?fit=510%2C510&ssl=1',
+        dayRates: { 1: 2.0, 2: 4.0, 3: 5.0, 4: 6.0, 5: 6.0, 6: 7.0, 7: 7.0 }
+      },
+      {
+        id: 8,
+        name: 'Rode NTG4+ Boompole',
+        dailyPrice: 9.0,
+        url: 'https://almidad.bh/product/rode-ntg4-boompole/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/03/pole_rodeic.png?fit=510%2C510&ssl=1',
+        dayRates: { 1: 9.0, 2: 18.0, 3: 24.0, 4: 32.0, 5: 41.0, 6: 49.0, 7: 57.0 }
+      },
+      {
+        id: 9,
+        name: 'Sennheiser EW112P G4',
+        dailyPrice: 8.0,
+        url: 'https://almidad.bh/product/sennheiser-ew112p-g4/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/03/sennheiser_ew_112p_g4_a_ew_112p_g4_camera_1552309826_1385595.jpg?fit=500%2C500&ssl=1',
+        dayRates: { 1: 8.0, 2: 16.0, 3: 22.0, 4: 29.0, 5: 36.0, 6: 43.0, 7: 50.0 }
+      },
+      {
+        id: 10,
+        name: 'ANKER Solix f1200 Power Station (1229 Wh)',
+        dailyPrice: 15.0,
+        url: 'https://almidad.bh/product/anker-solix-f1200-power-station-1500w-generator-1229-wh/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2024/08/712Tb4ZNdNL._AC_SL1500_.jpg?fit=510%2C510&ssl=1',
+        dayRates: { 1: 15.0, 2: 30.0, 3: 41.0, 4: 54.0, 5: 68.0, 6: 81.0, 7: 95.0 }
+      },
+      {
+        id: 11,
+        name: 'Sigma 24-70 f/2.8 ART',
+        dailyPrice: 12.0,
+        url: 'https://almidad.bh/product/sigma-24-70-f-2-8-art/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/03/1573004770_1516303.jpeg?fit=500%2C500&ssl=1',
+        dayRates: { 1: 12.0, 2: 24.0, 3: 32.0, 4: 43.0, 5: 54.0, 6: 65.0, 7: 76.0 }
+      },
+      {
+        id: 12,
+        name: 'Sony 16-35 f2.8 GM',
+        dailyPrice: 20.0,
+        url: 'https://almidad.bh/product/sony-16-35-f2-8-gm/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/03/1495023744_1338516.jpg?fit=500%2C500&ssl=1',
+        dayRates: { 1: 20.0, 2: 40.0, 3: 54.0, 4: 72.0, 5: 90.0, 6: 108.0, 7: 126.0 }
+      },
+      {
+        id: 13,
+        name: 'Sennheiser HD 280 Pro Headphones',
+        dailyPrice: 4.0,
+        url: 'https://almidad.bh/product/sennheiser-hd-280-pro-headphones/',
+        image:
+          'https://i0.wp.com/almidad.bh/wp-content/uploads/2021/06/1463997036_1253444.jpg?fit=500%2C500&ssl=1',
+        dayRates: { 1: 4.0, 2: 8.0, 3: 11.0, 4: 14.0, 5: 18.0, 6: 22.0, 7: 25.0 }
+      }
+    ];
+
+    let selectedEquipment = [];
+
+    function getCostForDays(item, days) {
+      if (item.dayRates && item.dayRates[days]) {
+        return item.dayRates[days];
+      }
+      // fallback: simple per-day * days if outside 1–7
+      return item.dailyPrice * days;
+    }
+
+    // Initialize
+    function init() {
+      renderEquipmentCheckboxes();
+      document
+        .getElementById('rentalDays')
+        .addEventListener('change', updateCalculations);
+      document
+        .getElementById('studentDiscount')
+        .addEventListener('change', updateCalculations);
+      updateCalculations();
+    }
+
+    function renderEquipmentCheckboxes() {
+      const container = document.getElementById('equipmentCheckboxes');
+      container.innerHTML = equipmentData
+        .map(
+          (eq) => `
+        <label class="equipment-item">
+          <input type="checkbox" value="${eq.id}" onchange="toggleEquipment(${eq.id}, this.checked)">
+          <img src="${eq.image}" alt="${eq.name}" class="equipment-item-image"
+            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23ddd%22 width=%2260%22 height=%2260%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2212%22 fill=%22%23999%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+          <div class="equipment-item-info">
+            <div class="equipment-item-name">${eq.name}</div>
+            <div class="equipment-item-price">${eq.dailyPrice.toFixed(3)} BHD/day</div>
+          </div>
+        </label>
+      `
+        )
+        .join('');
+    }
+
+    function toggleEquipment(equipmentId, isChecked) {
+      if (isChecked) {
+        const equipment = equipmentData.find((e) => e.id === equipmentId);
+        const existingItem = selectedEquipment.find((e) => e.id === equipmentId);
+
+        if (!existingItem) {
+          selectedEquipment.push({
+            ...equipment,
+            quantity: 1
+          });
+        }
+      } else {
+        selectedEquipment = selectedEquipment.filter((e) => e.id !== equipmentId);
+      }
+
+      updateCalculations();
+    }
+
+    function removeEquipment(equipmentId) {
+      selectedEquipment = selectedEquipment.filter((e) => e.id !== equipmentId);
+      const checkbox = document.querySelector(`input[type="checkbox"][value="${equipmentId}"]`);
+      if (checkbox) checkbox.checked = false;
+      updateCalculations();
+    }
+
+    function updateQuantity(equipmentId, newQuantity) {
+      const item = selectedEquipment.find((e) => e.id === equipmentId);
+      if (item) {
+        const qty = parseInt(newQuantity) || 0;
+        if (qty > 0) {
+          item.quantity = qty;
+        } else {
+          removeEquipment(equipmentId);
+        }
+        updateCalculations();
+      }
+    }
+
+    function updateCalculations() {
+      const rentalDaysInput = document.getElementById('rentalDays');
+      let rentalDays = parseInt(rentalDaysInput.value) || 3;
+      if (rentalDays < 1) rentalDays = 1;
+      rentalDaysInput.value = rentalDays;
+
+      const hasStudentDiscount = document.getElementById('studentDiscount').checked;
+      const discountBadge = document.getElementById('discountBadge');
+
+      if (hasStudentDiscount) {
+        discountBadge.style.display = 'inline-block';
+      } else {
+        discountBadge.style.display = 'none';
+      }
+
+      const tableBody = document.getElementById('tableBody');
+      if (selectedEquipment.length === 0) {
+        tableBody.innerHTML = `
+          <tr class="empty-state">
+            <td colspan="8">
+              <div class="empty-state-icon">📦</div>
+              <div class="empty-state-text">No equipment selected. Check items on the left to get started!</div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = selectedEquipment
+          .map((item) => {
+            const dailyTotal = item.dailyPrice * item.quantity;
+            const threeDayUnit =
+              item.dayRates && item.dayRates[3]
+                ? item.dayRates[3]
+                : item.dailyPrice * 3;
+            const perItemDaysCost = getCostForDays(item, rentalDays);
+            const rentalTotal = perItemDaysCost * item.quantity;
+
+            return `
+            <tr>
+              <td class="item-name">${item.name}</td>
+              <td class="price-cell">${item.dailyPrice.toFixed(3)}</td>
+              <td class="price-cell">${threeDayUnit.toFixed(3)}</td>
+              <td style="text-align: center;">
+                <select class="quantity-select" onchange="updateQuantity(${item.id}, this.value)">
+                  ${Array.from({ length: 10 }, (_, i) => i + 1)
+                    .map(
+                      (n) =>
+                        `<option value="${n}" ${
+                          n === item.quantity ? 'selected' : ''
+                        }>${n}</option>`
+                    )
+                    .join('')}
+                </select>
+              </td>
+              <td class="price-cell">${dailyTotal.toFixed(3)}</td>
+              <td class="price-cell">${rentalTotal.toFixed(3)}</td>
+              <td><a href="${item.url}" target="_blank" class="link-cell">${item.url}</a></td>
+              <td style="text-align: center;">
+                <button class="remove-btn" onclick="removeEquipment(${item.id})">Remove</button>
+              </td>
+            </tr>
+          `;
+          })
+          .join('');
+      }
+
+      // Calculate totals
+      const totalDaily = selectedEquipment.reduce(
+        (sum, item) => sum + item.dailyPrice * item.quantity,
+        0
+      );
+      const totalRental = selectedEquipment.reduce((sum, item) => {
+        const perItemDaysCost = getCostForDays(item, rentalDays);
+        return sum + perItemDaysCost * item.quantity;
+      }, 0);
+
+      let finalTotal = totalRental;
+      let discountAmount = 0;
+
+      if (hasStudentDiscount) {
+        discountAmount = totalRental * 0.15;
+        finalTotal = totalRental - discountAmount;
+        document.getElementById('discountRow').style.display = 'flex';
+        document.getElementById('discountAmount').textContent =
+          '-' + discountAmount.toFixed(3);
+      } else {
+        document.getElementById('discountRow').style.display = 'none';
+      }
+
+      document.getElementById('summaryDaily').textContent = totalDaily.toFixed(3);
+      document.getElementById('summaryTotal').textContent = totalRental.toFixed(3);
+      document.getElementById('grandTotal').textContent = finalTotal.toFixed(3);
+    }
+
+    function resetCalculator() {
+      selectedEquipment = [];
+      document
+        .querySelectorAll('.equipment-list input[type="checkbox"]')
+        .forEach((cb) => (cb.checked = false));
+      document.getElementById('rentalDays').value = 3;
+      document.getElementById('studentDiscount').checked = false;
+      updateCalculations();
+    }
+
+    function exportData() {
+      const rentalDays = parseInt(document.getElementById('rentalDays').value) || 3;
+      const hasStudentDiscount = document.getElementById('studentDiscount').checked;
+
+      const totalDaily = selectedEquipment.reduce(
+        (sum, item) => sum + item.dailyPrice * item.quantity,
+        0
+      );
+      const totalRental = selectedEquipment.reduce((sum, item) => {
+        const perItemDaysCost = getCostForDays(item, rentalDays);
+        return sum + perItemDaysCost * item.quantity;
+      }, 0);
+
+      let finalTotal = totalRental;
+      let discountAmount = 0;
+
+      if (hasStudentDiscount) {
+        discountAmount = totalRental * 0.15;
+        finalTotal = totalRental - discountAmount;
+      }
+
+      let csv = 'AlMidad Rental Costing\n';
+      csv += `Generated: ${new Date().toLocaleString()}\n`;
+      csv += `Rental Duration: ${rentalDays} days\n`;
+      csv += `Student Discount Applied: ${
+        hasStudentDiscount ? 'Yes (15%)' : 'No'
+      }\n\n`;
+      csv += `Item,Per-day (BHD),3-day unit cost (BHD),Qty,Total 1-day (BHD),Total ${rentalDays}-days (BHD),Source URL\n`;
+
+      selectedEquipment.forEach((item) => {
+        const dailyTotal = item.dailyPrice * item.quantity;
+        const threeDayUnit =
+          item.dayRates && item.dayRates[3]
+            ? item.dayRates[3]
+            : item.dailyPrice * 3;
+        const perItemDaysCost = getCostForDays(item, rentalDays);
+        const rentalTotal = perItemDaysCost * item.quantity;
+
+        csv += `"${item.name}",${item.dailyPrice.toFixed(3)},${threeDayUnit.toFixed(
+          3
+        )},${item.quantity},${dailyTotal.toFixed(3)},${rentalTotal.toFixed(
+          3
+        )},"${item.url}"\n`;
+      });
+
+      csv += `\nTotal 1-day (BHD),${totalDaily.toFixed(3)}\n`;
+      csv += `Total ${rentalDays}-days (BHD),${totalRental.toFixed(3)}\n`;
+      if (hasStudentDiscount) {
+        csv += `Student Discount (15%),${discountAmount.toFixed(3)}\n`;
+      }
+      csv += `GRAND TOTAL,${finalTotal.toFixed(3)}\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `almidad_rental_costing_${new Date()
+        .toISOString()
+        .split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
